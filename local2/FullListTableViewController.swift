@@ -7,18 +7,67 @@
 //
 
 import UIKit
+import Firebase
+import FirebaseDatabase
 
 class FullListTableViewController: UITableViewController {
 
+    let rootRef = FIRDatabase.database().reference().child("Texts").ref
+    
+    var texts = [Placed]()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        
+        fetch()
+
+        
         // Uncomment the following line to preserve selection between presentations
         // self.clearsSelectionOnViewWillAppear = false
 
         // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
         // self.navigationItem.rightBarButtonItem = self.editButtonItem()
     }
+    
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        // #warning Incomplete implementation, return the number of rows
+        print(texts.count)
+        return texts.count
+    }
+    
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath) as UITableViewCell
+        print(texts.count)
+        
+        var text : Placed?
+        print(indexPath.row)
+        text = texts[indexPath.row]
+        cell.textLabel?.text = text?.message
+        
+        return cell
+    }
+    
+    
+    
+    func fetch() {
+        rootRef.observeSingleEvent(of: .value, with: { (FIRDataSnapshot) in
+            //print(FIRDataSnapshot.childrenCount) // I got the expected number of items
+            let enumerator = FIRDataSnapshot.children
+            while let rest = enumerator.nextObject() as? FIRDataSnapshot {
+                let dictionary = rest.value as? [String: AnyObject]
+                let text = Placed(latitude: dictionary!["latitude"]! as! Double, longitude: dictionary!["longitude"]! as! Double, message: dictionary!["message"]! as! String, height: dictionary!["height"]! as! Int, type: dictionary!["type"]! as! Int)
+                self.texts.append(text)
+                print("list")
+                print(self.texts[self.texts.count-1].latitude)
+                print(self.texts[self.texts.count-1].longitude)
+                print(self.texts[self.texts.count-1].message)
+                
+            }
+        }, withCancel: nil)
+        
+    }
+
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
@@ -29,13 +78,9 @@ class FullListTableViewController: UITableViewController {
 
     override func numberOfSections(in tableView: UITableView) -> Int {
         // #warning Incomplete implementation, return the number of sections
-        return 0
+        return 1
     }
 
-    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        // #warning Incomplete implementation, return the number of rows
-        return 0
-    }
 
     /*
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {

@@ -10,7 +10,10 @@ import Foundation
 
 
 struct Placed {
+    
     var latitude : Double
     var longitude : Double
     var message : String
+    var height : Int
+    var type : Int
 }
